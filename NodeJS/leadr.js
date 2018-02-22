@@ -1,3 +1,19 @@
+/// 
+function _login(req, res) {
+    return userService.login(req.model)
+        .then(user => {
+            if (_isValidUser(req.model.password, user)) {
+                helpers.sendAuthCookie.bind(null, req, res, user)()
+            } else {
+                res.status(401).send(new responses.ErrorResponse('Invalid Account Information'))
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).send(new responses.ErrorResponse(err))
+        })
+}
+
 function authenticate(req, res, next) {
 
     if (!req.cookies.auth && !req.cookies.auth_hash) {
