@@ -15,6 +15,14 @@ function _updatePaidLeadsStatus(doc, batchId) {
 
 }
 
+function _login(model) {
+    return conn.db().collection('leadr_user').find({ email: { $eq: model.email } })
+        .map(user => {
+            return user
+        })
+        .next()
+}
+
 function readByUserId(id, count) {
     return conn.db().collection('leads').aggregate([{
         "$sort": {
