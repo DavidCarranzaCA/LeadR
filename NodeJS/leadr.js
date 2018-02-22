@@ -1,4 +1,28 @@
-/// 
+////
+function disburse(req, res) {
+    let batchSelectedLeads = {};
+    batchSelectedLeads.selectedLeadsArray = req.model;
+
+    leadsService.paypalBatch(batchSelectedLeads)
+        .then(id => {
+            return paypalService.disbursePayment(batchSelectedLeads.selectedLeadsArray, id)
+                .then(payout => {
+                    return leadsService.updateBatchPayout(id, payout.batch_header.payout_batch_id)
+                        .then(result => {
+                            return leadsService.updatePaidLeadsStatus(batchSelectedLeads.selectedLeadsArray, payout.batch_header.payout_batch_id)
+                                .then(result => {
+                                    console.log("Disburse Payments Success")
+                                    res.json(new responses.SuccessResponse())
+                                })
+                                .catch(err => res.send(new responses.ErrorResponse(err)));
+                        })
+                        .catch(err => console.log(err));
+                })
+                .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+}
+
 function _login(req, res) {
     return userService.login(req.model)
         .then(user => {
