@@ -1,5 +1,20 @@
 
 /// EXAMPLE MONGODB QUERIES AND SEVICES
+
+
+function _updatePaidLeadsStatus(doc, batchId) {
+    let closedLeads = doc.map(paidLeads => {
+        return new ObjectId(paidLeads._id)
+    })
+    return conn.db().collection("leads").update({ _id: { $in: closedLeads } }, {
+        $set: {
+            status: "Paid",
+            batchId: batchId
+        }
+    }, { multi: true }).then(result => Promise.resolve())
+
+}
+
 function readByUserId(id, count) {
     return conn.db().collection('leads').aggregate([{
         "$sort": {
@@ -103,3 +118,5 @@ function readAllExt(leadStatus) {
 //////// Information Omitted for Security
     ]).toArray()
 }
+
+
