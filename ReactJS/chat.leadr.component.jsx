@@ -1,7 +1,7 @@
 import React from 'react'
 import ConversationsList from '@app/components/conversations/conversations.navbar.jsx'
 import ChatBox from '@app/components/chatbox/chat-box.component.jsx'
-/// ... omitted for security
+import tostada from '@app/helpers/Tostada';
 import UserChat from '@app/components/conversations-chat-list/user-chat.component.jsx';
 
 class ConversationsChatList extends React.PureComponent {
@@ -27,7 +27,6 @@ class ConversationsChatList extends React.PureComponent {
         this.setState({
             messages: [],
         })
-        window.removeEventListener('click', this.submitChat, false);
         window.removeEventListener('click', this.handleClick, false);
     }
 
@@ -47,7 +46,6 @@ class ConversationsChatList extends React.PureComponent {
                 }
             };
             this.state.ws.send(JSON.stringify(newChat));
-            this.setState({ userId: userId })
         }
     }
 
@@ -104,7 +102,7 @@ class ConversationsChatList extends React.PureComponent {
 
                                         <div className="col-md-8 col-md-offset-1" style={{ maxHeight: '100%', overFlowY: 'auto' }}>
                                             <br />
-                                            <br/>
+                                            <br />
                                             <ChatBox userMessage={this.state.messages} />
                                         </div>
                                     </div>
