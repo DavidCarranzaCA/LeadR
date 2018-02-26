@@ -1,27 +1,32 @@
+const Lead = require('../models/lead')
+const mongodb = require('../mongodb')
+const conn = mongodb.connection
+const ObjectId = mongodb.ObjectId
 
-/// EXAMPLE MONGODB QUERIES AND SEVICES
-
-
-function _updatePaidLeadsStatus(doc, batchId) {
-    let closedLeads = doc.map(paidLeads => {
-        return new ObjectId(paidLeads._id)
-    })
-    return conn.db().collection("leads").update({ _id: { $in: closedLeads } }, {
-        $set: {
-            status: "Paid",
-            batchId: batchId
-        }
-    }, { multi: true }).then(result => Promise.resolve())
-
+module.exports = {
+    readAll: readAll,
+    readAllExt: readAllExt,
+    readById: readById,
+    create: create,
+    update: update,
+    updateNotesInLeads: _updateNotesInLeads,
+    updatePaidLeadsStatus: _updatePaidLeadsStatus,
+    updateStatus: _updateStatus,
+    delete: _delete,
+    readMetricsLeadByDate: _readMetricsLeadByDate,
+    readByUserId: readByUserId,
+    readByIdExt: readByIdExt,
+    getByProviderId: _getByProviderId,
+    getPaidLeads: _getPaidLeads,
+    updateSinglePaidLeadsStatus: _updateSinglePaidLeadsStatus,
+    getUserByLeadId: _getUserByLeadId,
+    paypalBatch: _paypalBatch,
+    updateBatchPayout:_updateBatchPayout
 }
 
-function _login(model) {
-    return conn.db().collection('leadr_user').find({ email: { $eq: model.email } })
-        .map(user => {
-            return user
-        })
-        .next()
-}
+// .. Omitted
+
+// .. Omitted
 
 function readByUserId(id, count) {
     return conn.db().collection('leads').aggregate([{
@@ -60,6 +65,66 @@ function readByUserId(id, count) {
     ]).toArray()
 }
 
+// .. Omitted
+
+function _updatePaidLeadsStatus(doc, batchId) {
+    let closedLeads = doc.map(paidLeads => {
+        return new ObjectId(paidLeads._id)
+    })
+    return conn.db().collection("leads").update({ _id: { $in: closedLeads } }, {
+        $set: {
+            status: "Paid",
+            batchId: batchId
+        }
+    }, { multi: true }).then(result => Promise.resolve())
+
+}
+
+//.. Omitted
+// .. Omitted
+// ... Omitted
+
+//.... Omitted
+
+function _getByProviderId(id, count) {
+    return conn.db().collection('leads').aggregate([{
+        "$sort": {
+            "dateUpdated": -1
+        }
+    },
+    {
+        "$limit": Number(count)
+    },
+    {
+        "$match": { "providerId": new ObjectId(id) }
+    },
+    {
+        "$lookup": {
+            "from": "providerService",
+            "localField": "providerId",
+            "foreignField": "providerId",
+            "as": "providerService"
+        }
+    },
+    {
+        "$unwind": "$providerService"
+    },
+    {
+        "$addFields": {
+            "providerServiceInfo": {
+                "description": "$providerService.description"
+            }
+        },
+    },
+    {
+        "$project": {
+            "providerData": 0,
+            "userData": 0,
+            "providerService": 0
+        }
+    }
+    ]).toArray()
+}
 
 function readAllExt(leadStatus) {
     return conn.db().collection('leads').aggregate([{
@@ -115,16 +180,43 @@ function readAllExt(leadStatus) {
             }
         }
     },
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
-//////// Information Omitted for Security
+    {
+        "$project": {
+            "providerName": 0,
+            "serviceName": 0,
+            "notes": 0,
+            "status": 0,
+            "description": 0,
+            "providerId": 0,
+            "serviceId": 0,
+            "userId": 0,
+            "userInfo": 0,
+            "contact": 0,
+            "company.city": 0,
+            "company.state": 0,
+            "providerData": 0,
+            "userData": 0,
+            "fileAttachment": 0
+        }
+    }
     ]).toArray()
 }
+
+//... Omitted
+
+//... Omitted
+
+/// Omitted
+
+// Omitted
+
+// .. Omitted
+
+
+
+
+
+
+
 
 
